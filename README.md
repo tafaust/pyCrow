@@ -1,7 +1,7 @@
 <img src='./resources/raven-576679_960_720.png' height="150px" align="left" padding="0" margin="0">
 
 
-# pyCrow: A Python 3.6 speech recognition framework.
+<h1>pyCrow:<br />A Python 3.6 speech recognition framework.</h1>
 
 Welcome to the pyCrow speech recognition project!
 I tinker on this project mainly in my free time to keep up with Machine Learning and Python.
