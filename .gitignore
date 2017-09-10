@@ -161,4 +161,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# audio files
+.wav
+.mp3
+
 # End of https://www.gitignore.io/api/python,pycharm+all
