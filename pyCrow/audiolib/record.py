@@ -11,17 +11,20 @@ Information to write this code are taken from:
 """
 
 import logging
+import struct
 import time
 import wave
 from array import array
+from collections import deque
 from struct import pack
 from sys import byteorder
+from threading import Thread
 
 import numpy as np
 import pyaudio
+from typing import Union
 
-from pyCrow.audiolib.process import is_silent, normalize, trim, add_silence, butter_bandpass_filter
-
+from pyCrow.audiolib.process import normalize, trim, add_silence, butter_bandpass_filter
 
 L = logging.getLogger(__name__)
 L.info('Loaded module: {}.'.format(__name__))
@@ -29,10 +32,10 @@ L.info('Loaded module: {}.'.format(__name__))
 
 class VoiceRecorder(object):
     # constants
-    THRESHOLD = 500
-    CHUNK_SIZE = 1024
-    FORMAT = pyaudio.paInt16
-    RATE = 44100
+    RATE: int = 44100
+    THRESHOLD: int = 500
+    CHUNK_SIZE: int = 1024
+    FORMAT: int = pyaudio.paInt16
 
     def __init__(self, threshold: int = THRESHOLD, chunk_size: int = CHUNK_SIZE,
                  format: int = FORMAT, rate: int = RATE):
@@ -45,66 +48,85 @@ class VoiceRecorder(object):
         L.info('Instantiated VoiceRecorder with specs:\n' + '\n'.join(
             ['\t\t{}: {}'.format(k, v) for k, v in self.__dict__.items()]))
 
-    def record(self, seconds: int or float = 0):
+    def record(self, seconds: Union[int, float] = 0):
         """
-        RecordAudio a word or words from the microphone and 
+        RecordAudio a word or words from the microphone and
         return the data as an array of signed shorts.
-    
-        Normalizes the audio, trims silence from the 
-        start and end, and pads with 0.5 seconds of 
-        blank sound to make sure VLC et al can play 
+
+        Normalizes the audio, trims silence from the
+        start and end, and pads with 0.5 seconds of
+        blank sound to make sure VLC et al can play
         it without getting chopped off.
         """
+        # store data in this array
+        r = array('h')
+
+        # use a ring buffer to buffer at most 100 seconds audio capture
+        ring_buffer = deque(maxlen=int(100 * self.CHUNK_SIZE))
+
+        def _callback(in_data: bytearray, frame_count, time_info, status):
+            L.debug('Audio stream callback status is {}'.format(status))
+            if status != 0:
+                L.error('Non zero exit status in audio stream callback!')
+                exit()
+
+            unpacked_in_data = [
+                struct.unpack('h', bytes(in_data[i:i + 2]))[0]
+                for i in range(0, len(in_data), 2)
+            ]
+
+            # append data to the ring buffer
+            if byteorder == 'big':
+                L.debug('Appending big endian unpacked audio data to ring buffer.')
+                ring_buffer.extendleft(unpacked_in_data)
+            else:  # little
+                L.debug('Appending big little unpacked audio data to ring buffer.')
+                ring_buffer.extend(unpacked_in_data)
+
+            # when ring buffer is full, flush it to a byte array
+            if len(ring_buffer) >= int(self.CHUNK_SIZE):
+                L.debug('Writing audio from ring buffer to byte array.')
+                Thread(target=r.extend, args=[ring_buffer.copy()]).start()
+                ring_buffer.clear()
+
+            return None, pyaudio.paContinue
+
+        # ====
         p = pyaudio.PyAudio()
-        stream = p.open(format=self.FORMAT, channels=1, rate=self.RATE, input=True, output=True,
-                        frames_per_buffer=self.CHUNK_SIZE)
+        stream = p.open(format=self.FORMAT, channels=1, rate=self.RATE, input=True, output=False,
+                        frames_per_buffer=self.CHUNK_SIZE, stream_callback=_callback)
+        sample_width = p.get_sample_size(self.FORMAT)
+
         L.info('Input device is running with the following specs:\n' + '\n'.join(
             ['\t\t{:30}: {}'.format(k, v) for k, v in p.get_default_input_device_info().items()]))
 
-        num_silent = 0
-        snd_started = False
-
-        r = array('h')
-
         t = time.time()
-        while time.time() <= (t + seconds) or seconds == 0:
-            # little endian, signed short
-            snd_data = array('h', stream.read(self.CHUNK_SIZE))
-            if byteorder == 'big':
-                snd_data.byteswap()
-            r.extend(snd_data)
+        while stream.is_active() and (time.time() <= (t + seconds) or seconds == 0):
+            time.sleep(1 / self.RATE)
+            yield sample_width, r
 
-            silent = is_silent(snd_data, threshold=self.THRESHOLD)
-
-            if silent and snd_started:
-                num_silent += 1
-                # print(num_silent)
-            elif not silent and not snd_started:
-                snd_started = seconds == 0
-
-            if snd_started and num_silent > 50:
-                break
-
-        sample_width = p.get_sample_size(self.FORMAT)
+        L.debug('Stopping audio stream.')
         stream.stop_stream()
+        L.debug('Closing audio stream.')
         stream.close()
         p.terminate()
 
+        # post-processing of the audio data
         r = normalize(r, absolute_maximum=16384)
         r = trim(r, threshold=self.THRESHOLD)
         r = add_silence(r, seconds=0.5, rate=self.RATE)
 
-        # TODO this needs to be done online (i.e. in the above loop)
-        # read data into numpy array and filter into voice frequency (VF) [parameters tuned
-        # according to my voice]
+        # TODO this shall to be done online (i.e. in the loop above)
+        # read data into numpy array and bandpass filter within the voice frequency (VF)
         data = np.fromstring(r.tobytes(), dtype=np.int16)
         data = butter_bandpass_filter(data, cutfreq=(85.0, 800.0),
                                       sampling_frequency=self.RATE / 5, order=6)
 
         return sample_width, data
 
-    def record_to_file(self, path: str, seconds: int or float = 0):
-        "Records from the microphone and outputs the resulting data to 'path'"
+    def record_to_file(self, path: str, seconds: Union[int, float] = 0):
+        """ Records from the microphone and outputs the resulting data to 'path'
+        """
         sample_width, npdata = self.record(seconds=seconds)
         data = pack('<' + ('h' * len(npdata.astype(array))), *npdata.astype(array))
 
@@ -123,3 +145,6 @@ class VoiceRecorder(object):
         s.specgram(npdata, NFFT=1024, Fs=self.RATE / 5, noverlap=900, cmap='binary')
         plt.show(block=True)
         '''
+
+    def record_specgram(self):
+        pass  # TODO

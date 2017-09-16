@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import logging
-from array import array
+from array import array, ArrayType
 
 import numpy as np
 from scipy.signal import butter, lfilter
@@ -24,16 +24,16 @@ def butter_bandpass_filter(data: np.ndarray, cutfreq: Union[List[float], Tuple[f
     return lfilter(b, a, data).astype(dtype=data.dtype)  # returns filtered data y
 
 
-def is_silent(snd_data: array, threshold: int or float):
+def is_silent(snd_data: array, threshold: int or float) -> bool:
     """Returns 'True' if below the 'silent' threshold
     """
     return max(snd_data) < threshold
 
 
-def normalize(snd_data: array, absolute_maximum: int or float):
+def normalize(snd_data: array, absolute_maximum: int or float) -> ArrayType:
     """Average the volume out
     """
-    L.info('Normalizing data with {} many samples with an absolute maximum of {}'.format(
+    L.info('Normalizing data with {} many samples with an absolute maximum value of {}'.format(
         len(snd_data), absolute_maximum))
     empirical_maximum: float = max(abs(i) for i in snd_data)
     times = float(absolute_maximum) / empirical_maximum
@@ -44,7 +44,7 @@ def normalize(snd_data: array, absolute_maximum: int or float):
     return r
 
 
-def trim(snd_data: array, threshold: int or float):
+def trim(snd_data: array, threshold: int or float) -> ArrayType:
     """Trim the blank spots at the start and end
     """
 
@@ -71,13 +71,14 @@ def trim(snd_data: array, threshold: int or float):
     return snd_data
 
 
-def add_silence(snd_data: array, seconds: int or float, rate: int or float):
+def add_silence(snd_data: array, seconds: int or float, rate: int or float) -> ArrayType:
     """Add silence to the start and end of 'snd_data' of length 'seconds'
     """
     L.info('Adding {} seconds of silence to the data totalling in {} extra samples.'.format(
-        seconds, int(seconds * rate) * 2
+        seconds * 2, int(seconds * rate) * 2
     ))
-    r = array('h', [0 for i in range(int(seconds * rate))])
+    silence = [0]*int(seconds*rate)
+    r = array('h', silence)  # silence at the beginning
     r.extend(snd_data)
-    r.extend([0 for i in range(int(seconds * rate))])
+    r.extend(silence)  # silence at the end
     return r
