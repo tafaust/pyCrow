@@ -61,26 +61,21 @@ class VoiceRecorder(object):
         # store data in this array
         r = array('h')
 
-        # use a ring buffer to buffer at most 100 seconds audio capture
-        ring_buffer = deque(maxlen=int(100 * self.CHUNK_SIZE))
+        # use a ring buffer to buffer at most 10000 chunks
+        ring_buffer = deque(maxlen=int(1e4 * self.CHUNK_SIZE))
 
-        def _callback(in_data: bytearray, frame_count, time_info, status):
+        def _callback(in_data: bytes, frame_count, time_info, status):
             L.debug('Audio stream callback status is {}'.format(status))
             if status != 0:
-                L.error('Non zero exit status in audio stream callback!')
+                L.error('Non zero exit status in audio stream callback! Exiting...')
                 exit()
 
-            unpacked_in_data = [
-                struct.unpack('h', bytes(in_data[i:i + 2]))[0]
-                for i in range(0, len(in_data), 2)
-            ]
+            unpacked_in_data = list(struct.unpack('h'*frame_count, in_data))
 
             # append data to the ring buffer
             if byteorder == 'big':
-                L.debug('Appending big endian unpacked audio data to ring buffer.')
                 ring_buffer.extendleft(unpacked_in_data)
             else:  # little
-                L.debug('Appending big little unpacked audio data to ring buffer.')
                 ring_buffer.extend(unpacked_in_data)
 
             # when ring buffer is full, flush it to a byte array
@@ -91,7 +86,7 @@ class VoiceRecorder(object):
 
             return None, pyaudio.paContinue
 
-        # ====
+        # let the recording begin…
         p = pyaudio.PyAudio()
         stream = p.open(format=self.FORMAT, channels=1, rate=self.RATE, input=True, output=False,
                         frames_per_buffer=self.CHUNK_SIZE, stream_callback=_callback)
@@ -103,7 +98,7 @@ class VoiceRecorder(object):
         t = time.time()
         while stream.is_active() and (time.time() <= (t + seconds) or seconds == 0):
             time.sleep(1 / self.RATE)
-            yield sample_width, r
+            #yield sample_width, r
 
         L.debug('Stopping audio stream.')
         stream.stop_stream()
@@ -112,7 +107,7 @@ class VoiceRecorder(object):
         p.terminate()
 
         # post-processing of the audio data
-        r = normalize(r, absolute_maximum=16384)
+        r = normalize(r, absolute_maximum=16384)  # 16384 is the max for int16
         r = trim(r, threshold=self.THRESHOLD)
         r = add_silence(r, seconds=0.5, rate=self.RATE)
 
