@@ -4,11 +4,23 @@
 <h1>pyCrow:<br />A Python 3.6 speech recognition framework.</h1>
 
 Welcome to the pyCrow speech recognition project!
-I tinker on this project mainly in my free time to keep up with Machine Learning and Python.
-I, furthermore, created this project to learn more about Deep Learning and the Tensorflow framework.
+The main purpose of this project is, first, to keep up with Machine Learning and Python and, second, to teach myself about Deep Learning in my free time.
+More specifically,I aim to learn about Long-Short Term Memory (LSTM) Neural Networks (NN). In case you are interested to hear more about the project, give me feedback on the code, or even want to contribute to this project, feel free to send me a PM (or PR).
+Thanks!
 
 ## Installation
-TBD
+Checkout this git repository first.
+Then, make sure you have Python3.6 and virtualenv installed in order to create a virtual environment based on Python 3.6.
+
+    $ git clone git@github.com:tahesse/pyCrow.git && cd ./pyCrow
+    $ virtualenv -p python3.6 venv
+
+Next, activate the virtualenv install the required python packages via pip.
+
+    $ source ./venv/bin/activate
+    $ pip install -r requirements.txt
+
+By now, you should have the framework installed. If not, please open up an issue for that.
 
 ## Getting Started
 TBD
