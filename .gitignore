@@ -165,4 +165,9 @@ venv.bak/
 *.wav
 *.mp3
 
+# explicitly ignore logging.conf to keep it in the most basic form
+# and do not have specific configurations pushed, in case you want
+# to change the basic form, force add it
+logging.conf
+
 # End of https://www.gitignore.io/api/python,pycharm+all
