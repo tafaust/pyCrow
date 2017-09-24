@@ -5,8 +5,11 @@
 
 Welcome to the pyCrow speech recognition project!
 The main purpose of this project is, first, to keep up with Machine Learning and Python and, second, to teach myself about Deep Learning in my free time.
-More specifically,I aim to learn about Long-Short Term Memory (LSTM) Neural Networks (NN). In case you are interested to hear more about the project, give me feedback on the code, or even want to contribute to this project, feel free to send me a PM (or PR).
+More specifically, I aim to learn about Long-Short Term Memory (LSTM) Neural Networks (NN). In case you are interested to hear more about the project, give me feedback on the code, or even want to contribute to this project, feel free to send me a PM (or PR).
 Thanks!
+
+
+Note that I will use **$** and **#** in bash code examples to signal the required privileges.
 
 ## Installation
 Checkout this git repository first.
@@ -25,14 +28,17 @@ By now, you should have the framework installed. If not, please open up an issue
 ## Getting Started
 TBD
 
-## Examples
+## Documentation
 TBD
 
-## Documentation
+## Examples
 TBD
 
 ---
 # Auxiliary
+
+MFCC-standardized algorithm:
+* http://www.etsi.org/deliver/etsi_es/201100_201199/201108/01.01.03_60/es_201108v010103p.pdf
 
 CC0-licensed images taken from:
 * https://pixabay.com/en/raven-head-bird-black-feather-576679/
