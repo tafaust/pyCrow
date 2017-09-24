@@ -23,7 +23,11 @@ Next, activate the virtualenv install the required python packages via pip.
     $ source ./venv/bin/activate
     $ pip install -r requirements.txt
 
-By now, you should have the framework installed. If not, please open up an issue for that.
+Finally, you will need a `redis` Message Broker running. The suggested installation is via `docker`. Make sure to have the `docker` daemon running and install `redis` by typing the following in your console
+
+    # docker run --name crow-redis -d -p 6379:6379 redis
+
+By now, you should have the framework installed and be able to start it. If not, please open up an issue for that.
 
 ## Getting Started
 TBD
@@ -35,7 +39,7 @@ TBD
 TBD
 
 ---
-# Auxiliary
+# Auxiliary information
 
 MFCC-standardized algorithm:
 * http://www.etsi.org/deliver/etsi_es/201100_201199/201108/01.01.03_60/es_201108v010103p.pdf
