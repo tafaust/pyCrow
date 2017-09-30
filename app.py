@@ -18,13 +18,13 @@ logging.config.fileConfig('./logging.conf')
 L = logging.getLogger()
 
 
-# sonar-queue config
+# pulsar-queue config
 task_paths = ['pyCrow.crowlib.*', 'pq.jobs']
 data_store = 'redis://127.0.0.1:6379/7'
 worker = 2
 
 
 # build pulsar-queue app
-def app():
+def app() -> PulsarQueue:
     L.info('Starting PulsarQueue application.')
     return PulsarQueue(config=__file__)
