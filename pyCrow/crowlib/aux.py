@@ -1,25 +1,23 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Auxiliary functions.
+"""Auxiliary utilities for the pykka and pyCrow libraries.
+
+Contains helper classes and functions for the pyCrow lib and utilities for the pykka library.
 """
 
 # Python-native imports
-import asyncio
-import time
 
 # Third-party imports
-# noinspection PyPackageRequirements
-from pq import api
 
 
-@api.job()
-async def asynchronous(lag=1):
-    """Causes the queue to wait for `lag` seconds.
+class Action(object):
+    SERVER_STOP = {'cmd': 'server_stop'}
+    SERVER_START = {'cmd': 'server_start'}
+    SERVER_RESTART = {'cmd': 'server_restart'}
 
-    :param lag: The amount of seconds the global queue is delayed.
-    :return:The delta, i.e. the actual amount of delay that took place. 
-    """
-    start = time.time()
-    await asyncio.sleep(lag)
-    return time.time() - start
+    CONFIG_REFRESH = {'cmd': 'config_refresh'}
+    CONFIG_GET = {'cmd': 'config_get'}
+
+    RECORD_AUDIO = {'cmd': 'record_audio'}
+

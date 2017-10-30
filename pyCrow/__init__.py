@@ -2,15 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import logging
-logger = logging.getLogger(__name__)
-logger.info('Loaded lib: {}.'.format(__name__))
 
-
-from pyCrow import crowlib
 from pyCrow import audiolib
+from pyCrow import crowlib
 
-
-__all__ = [
-    crowlib,
-    audiolib,
-]
+L = logging.getLogger(__name__)
+L.info('Loaded lib: {}.'.format(__name__))

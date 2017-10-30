@@ -5,44 +5,33 @@
 """
 
 # Python-native imports
-import asyncio
 import logging.config
-from typing import Union
 
 # Third-party imports
-from pq import api
+import pykka
 
 # App imports
-from app import app
+from app import AppActor
+from pyCrow.crowlib import Action
 
-# prepare logging, i.e. load config and get the root logger
+# prepare logging, i.e. load config and get the root L
 logging.config.fileConfig('./logging.conf')
 L = logging.getLogger()
+logging.getLogger('pykka').setLevel(logging.DEBUG)
 
-
-async def aproc(proc) -> Union[asyncio.Future, asyncio.Future]:
-    return await proc.start()
-
-
-def main() -> None:
-    proc = app().api()
-    asyncio.get_event_loop().run_until_complete(aproc(proc))
-
-    # start running tasks from here on...
-    task = proc.tasks.execute(standalone)
-
-    # do something else...
-
-
-@api.job()
-def standalone(self):
-    from pyCrow.audiolib import VoiceRecorder
-    vr: VoiceRecorder = VoiceRecorder()
-    vr.record_to_file('./resources/demo.wav', seconds=10.)
-
-
-# script part
 if __name__ == '__main__':
-    L.info('Running standalone program.')
-    main()
-    L.info('Finished standalone program.')
+    L.info('Starting...')
+
+    ref: pykka.ActorRef = None
+    try:
+        ref = AppActor.start()
+        assert ref is not None
+        L.info(msg=f'Started Actor App ({ref.actor_urn})')
+
+    except AssertionError:
+        L.error(msg='Unable to start the app.')
+    except pykka.ActorDeadError as ade:
+        L.warning(msg=f'Message received for dead app: {ade}')
+
+    state = 'running' if ref.is_alive() else 'terminated'
+    L.info(f'Finished standalone program. Actor App ({ref.actor_urn}) is «{state}».')
