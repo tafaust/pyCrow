@@ -1,0 +1,20 @@
+{
+  "server": {
+    "address": "",
+    "port": 1337
+  },
+  "record": {
+    "duration": 10.0
+  },
+  "model_features": {
+    "mfcc": {}
+  },
+  "model_train": {
+    "lstm_nn": {}
+  },
+  "model_test": {
+    "lstm_nn": {
+      "loss": ""
+    }
+  }
+}
