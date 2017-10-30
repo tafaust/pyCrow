@@ -23,11 +23,7 @@ Next, activate the virtualenv install the required python packages via pip.
     $ source ./venv/bin/activate
     $ pip install -r requirements.txt
 
-Finally, you will need a `redis` Message Broker running. The suggested installation is via `docker`. Make sure to have the `docker` daemon running and install `redis` by typing the following in your console
-
-    # docker run --name crow-redis -d -p 6379:6379 redis
-
-By now, you should have the framework installed and be able to start it. If not, please open up an issue for that.
+By now, you should have the framework installed and be able to start it. If not, please open up an issue with your system specs and the error you ended up with.
 
 ## Getting Started
 TBD
