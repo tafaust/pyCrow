@@ -7,8 +7,14 @@ Contains helper classes and functions for the pyCrow lib and utilities for the p
 """
 
 # Python-native imports
+import logging.config
 
 # Third-party imports
+
+# App imports
+
+L = logging.getLogger(__name__)
+L.debug(f'Loaded module: {__name__}.')
 
 
 class Action(object):
@@ -19,5 +25,17 @@ class Action(object):
     CONFIG_REFRESH = {'cmd': 'config_refresh'}
     CONFIG_GET = {'cmd': 'config_get'}
 
-    RECORD_AUDIO = {'cmd': 'record_audio'}
+    AUDIO_RECORD = {'cmd': 'audio_record'}
+    AUDIO_RECORD_TO_FILE = {'cmd': 'audio_record_to_file'}
+    AUDIO_PLAYBACK = {'cmd': 'audio_playback'}  # shall replay sound with the buffer delay
+
+    """This action triggers an experiment to train or refine an existing model.
+    
+    Programmatically pre-hooked to this action is the recording and feature computation from 
+    multiple trials.
+    """
+    MODEL_TRAIN = {'cmd': 'model_train'}
+    """
+    """
+    MODEL_TEST = {'cmd': 'model_test'}
 

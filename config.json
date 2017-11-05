@@ -1,18 +1,28 @@
 {
   "server": {
     "address": "",
-    "port": 1337
+    "port": 34566
   },
-  "record": {
-    "duration": 10.0
+  "recorder": {
+    "file": "./resources/demo.wav",
+    "duration": 7.0
   },
   "model_features": {
+    "preprocessing": {},
     "mfcc": {}
   },
   "model_train": {
+    "experiment": {
+      "view": "web",
+      "view_web": {
+        "address": "",
+        "port": 34567
+      }
+    },
     "lstm_nn": {}
   },
   "model_test": {
+    "cv_folds": 10,
     "lstm_nn": {
       "loss": ""
     }

@@ -4,18 +4,14 @@
 # Python-native imports
 import logging
 
+# App imports
+from pyCrow.audiolib.audio import AudioActor
+
 # Third-party imports
 
-# App imports
-from pyCrow.audiolib.record import VoiceRecorder
-
-
-# prepare logging, i.e. load config and get the root L
 L = logging.getLogger(__name__)
-L.info(f'Loaded lib: {__name__}.')
-
-
+L.debug(f'Loaded module: {__name__}.')
 
 __all__ = [
-    VoiceRecorder.__name__,
+    AudioActor.__name__,
 ]
